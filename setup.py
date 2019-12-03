@@ -30,6 +30,7 @@ setup(
     author='Q-CTRL',
     author_email='support@q-ctrl.com',
     packages=['jwtauthenticator'],
+    package_dir={"": "."},
     package_data={},
     install_requires=['jupyterhub==1.*,>=1.0.0', 'python-jose==3.*,>=3.0.1'],
 )
