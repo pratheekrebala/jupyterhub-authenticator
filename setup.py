@@ -32,5 +32,5 @@ setup(
     packages=['jwtauthenticator'],
     package_dir={"": "."},
     package_data={},
-    install_requires=['jupyterhub==1.*,>=1.0.0', 'python-jose==3.*,>=3.0.1'],
+    install_requires=['jupyterhub==1.*,>=1.0.0', 'python-jose==3.*,>=3.0.1', 'wheel==0.*,>=0.33.6'],
 )
