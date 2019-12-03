@@ -1,0 +1,57 @@
+name: Push workflow
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '*.*'
+
+jobs:
+
+  housekeeping:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Perform housekeeping checks
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        source <(curl -sL http://ci.q-ctrl.com)
+        ./ci vault login -r ${{ secrets.VAULT_ROLE_ID }} -s ${{ secrets.VAULT_SECRET_ID }}        
+        ./ci docker run qctrl/python-build:3.7 /scripts/housekeeping.sh
+
+  publish_internally:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Publish development version
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        source <(curl -sL http://ci.q-ctrl.com)
+        ./ci vault login -r ${{ secrets.VAULT_ROLE_ID }} -s ${{ secrets.VAULT_SECRET_ID }}
+        ./ci docker run qctrl/python-build:3.7 /scripts/publish-dev-version.sh
+
+  publish_publicly:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Publish publicly
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        source <(curl -sL http://ci.q-ctrl.com)
+        ./ci docker run qctrl/python-build:3.7 /scripts/publish-release-publicly.sh
+
+  docker_build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build and push image to Docker Hub
+      run: |
+        source <(curl -sL http://ci.q-ctrl.com)
+        ./ci vault login -r ${{ secrets.VAULT_ROLE_ID }} -s ${{ secrets.VAULT_SECRET_ID }}
+        ./ci vault get -t $(cat .token) -p secret/data/dockerhub -k hub_user -o .hub_user
+        ./ci vault get -t $(cat .token) -p secret/data/dockerhub -k hub_pass -o .hub_pass
+        ./ci docker buildPush -u $(cat .hub_user) -p $(cat .hub_pass) -t qctrl/jupyterhub-k8s-hub:0.8.2 .
