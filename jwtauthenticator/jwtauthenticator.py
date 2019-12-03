@@ -9,7 +9,7 @@ from jose import jwt
 class JSONWebTokenLoginHandler(BaseHandler):
 
     def get(self):
-        self.log.info("Handler Instance: %s", self)
+        self.log.info("Handler Instance: %s", self.__dict__)
         header_name = self.authenticator.header_name
         param_name = self.authenticator.param_name
         header_is_authorization = self.authenticator.header_is_authorization
@@ -22,27 +22,27 @@ class JSONWebTokenLoginHandler(BaseHandler):
         audience = self.authenticator.expected_audience
         tokenParam = self.get_argument(param_name, default=False)
 
-        self.log.info("Auth header content is %s", auth_cookie_content)
+        self.log.info("Header '%s' = '%s'", header_name, auth_header_content)
 
         if auth_header_content and tokenParam:
-           raise web.HTTPError(400)
+            raise web.HTTPError(400)
         elif auth_header_content:
-           if header_is_authorization:
-              self.log.info("Header is auth")
-              # we should not see "token" as first word in the AUTHORIZATION header, if we do it could mean someone coming in with a stale API token
-              if auth_header_content.split()[0] != "bearer":
-                 raise web.HTTPError(403)
-              token = auth_header_content.split()[1]
-           else:
-              self.log.info("Header is not auth")
-              token = auth_header_content
+            if header_is_authorization:
+                self.log.info("Header is auth")
+                # we should not see "token" as first word in the AUTHORIZATION header, if we do it could mean someone coming in with a stale API token
+                if auth_header_content.split()[0] != "bearer":
+                    raise web.HTTPError(403)
+                token = auth_header_content.split()[1]
+            else:
+                self.log.info("Header is not auth")
+                token = auth_header_content
         elif auth_cookie_content:
-           token = auth_cookie_content
+            token = auth_cookie_content
         elif tokenParam:
-           token = tokenParam
+            token = tokenParam
         else:
-           self.log.info("Unidentified auth situation")
-           raise web.HTTPError(401)
+            self.log.info("Unidentified auth situation")
+            raise web.HTTPError(401)
 
         self.log.info("Token: %s", token)
         claims = "";
@@ -89,6 +89,11 @@ class JSONWebTokenLoginHandler(BaseHandler):
     def retrieve_username(claims, username_claim_field):
         # retrieve the username from the claims
         username = claims[username_claim_field]
+
+        # Our system returns the username as an integer - convert to string
+        if not isinstance(username, str):
+            username = "%s" % username
+            
         if "@" in username:
             # process username as if email, pull out string before '@' symbol
             return username.split("@")[0]
