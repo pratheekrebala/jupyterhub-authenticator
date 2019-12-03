@@ -33,4 +33,5 @@ setup(
     package_dir={"": "."},
     package_data={},
     install_requires=['jupyterhub==1.*,>=1.0.0', 'python-jose==3.*,>=3.0.1'],
+    extras_require={"dev": ["pylama==7.*,>=7.7.1"]},
 )
