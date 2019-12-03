@@ -4,7 +4,7 @@ from jupyterhub.auth import LocalAuthenticator
 from jupyterhub.utils import url_path_join
 from tornado import gen, web
 from traitlets import Unicode, Bool
-from jose import jwt
+from jose import jwt, exceptions
 
 class JSONWebTokenLoginHandler(BaseHandler):
 
@@ -67,13 +67,13 @@ class JSONWebTokenLoginHandler(BaseHandler):
         with open(signing_certificate, 'r') as rsa_public_key_file:
             try:
                 return jwt.decode(token, rsa_public_key_file.read(), audience=audience, options=opts)
-            except jose.exceptions.ExpiredSignatureError:
+            except exceptions.ExpiredSignatureError:
                 self.log.error("Token has expired")
-            except jose.exceptions.JWTError as ex:
+            except exceptions.JWTError as ex:
                 self.log.error("Token error - %s", ex)
-            except exception as ex:
+            except Exception as ex:
                 self.log.error("Could not decode token claims - %s", ex)
-            return None                
+            raise web.HTTPError(403)              
 
     @staticmethod
     def verify_jwt_using_secret(json_web_token, secret, audience):
@@ -85,13 +85,13 @@ class JSONWebTokenLoginHandler(BaseHandler):
         
         try:
             return jwt.decode(json_web_token, secret, algorithms=list(jwt.ALGORITHMS.SUPPORTED), audience=audience, options=opts)
-        except jose.exceptions.ExpiredSignatureError:
+        except exceptions.ExpiredSignatureError:
             self.log.error("Token has expired")
-        except jose.exceptions.JWTError as ex:
+        except exceptions.JWTError as ex:
             self.log.error("Token error - %s", ex)
-        except exception as ex:
+        except Exception as ex:
             self.log.error("Could not decode token claims - %s", ex)
-        return None     
+        raise web.HTTPError(403)   
 
     @staticmethod
     def retrieve_username(claims, username_claim_field):
