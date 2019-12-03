@@ -4,6 +4,9 @@ version = "0.0.0"
 description = "Q-CTRL JupyterHub JWT Authenticator"
 authors = ["Q-CTRL <support@q-ctrl.com>"]
 readme = "README.md"
+packages = [
+    { include = "jwtauthenticator" },
+]
 
 [[tool.poetry.source]]
 name = 'Q-CTRL PyPI'
