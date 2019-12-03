@@ -24,7 +24,7 @@ if os.path.exists(readme_path):
 setup(
     long_description=readme,
     name='qctrl-jupyterhub-authenticator',
-    version='0.0.4',
+    version='0.0.5',
     description='Q-CTRL JupyterHub JWT Authenticator',
     python_requires='<3.8,>=3.6.4',
     author='Q-CTRL',
