@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "qctrl-jupyterhub-authenticator"
-version = "0.0.1"
+version = "0.0.2"
 description = "Q-CTRL JupyterHub JWT Authenticator"
 authors = ["Q-CTRL <support@q-ctrl.com>"]
 readme = "README.md"
