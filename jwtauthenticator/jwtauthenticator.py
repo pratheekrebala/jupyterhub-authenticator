@@ -57,7 +57,6 @@ class JSONWebTokenLoginHandler(BaseHandler):
 
         self.redirect(_url)
 
-    @staticmethod
     def verify_jwt_with_claims(token, signing_certificate, audience):
         # If no audience is supplied then assume we're not verifying the audience field.
         if audience == "":
@@ -75,7 +74,6 @@ class JSONWebTokenLoginHandler(BaseHandler):
                 self.log.error("Could not decode token claims - %s", ex)
             raise web.HTTPError(403)              
 
-    @staticmethod
     def verify_jwt_using_secret(json_web_token, secret, audience):
         # If no audience is supplied then assume we're not verifying the audience field.
         if audience == "":
@@ -93,7 +91,6 @@ class JSONWebTokenLoginHandler(BaseHandler):
             self.log.error("Could not decode token claims - %s", ex)
         raise web.HTTPError(403)   
 
-    @staticmethod
     def retrieve_username(claims, username_claim_field):
         # retrieve the username from the claims
         username = claims[username_claim_field]
