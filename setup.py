@@ -30,7 +30,8 @@ setup(
     author='Q-CTRL',
     author_email='support@q-ctrl.com',
     packages=['jwtauthenticator'],
+    package_dir={"": "."},
     package_data={},
     install_requires=['jupyterhub==1.*,>=1.0.0', 'pyjwt==1.*,>=1.7.1'],
-    extras_require={'dev': ['pylama==7.*,>=7.7.1']},
+    extras_require={"dev": ["pylama==7.*,>=7.7.1"]},
 )
