@@ -6,6 +6,7 @@ from tornado import gen, web
 from traitlets import Unicode, Bool
 import jwt
 
+
 class JSONWebTokenLoginHandler(BaseHandler):
 
     def get(self):
@@ -49,8 +50,7 @@ class JSONWebTokenLoginHandler(BaseHandler):
         username = self.retrieve_username(claims, username_claim_field)
         user = self.user_from_username(username)
         self.set_login_cookie(user)
-        self._set_cookie("jwt", token, False)
-        # user.save_auth_state({"jwt": token})
+        # self._set_cookie("jupyterhub-jwt", token, False)
 
         _url = url_path_join(self.hub.server.base_url, 'spawn')
         next_url = self.get_argument('next', default=False)
@@ -94,18 +94,6 @@ class JSONWebTokenLoginHandler(BaseHandler):
         else:
             # assume not username and return the user
             return username
-
-    @gen.coroutine
-    def pre_spawn_start(self, user, spawner):
-        """Pass JWT to spawner via environment variable"""
-        self.log.info("*** Pre Spawn Start ****")
-        self.log.info("Spawner: %s", spawner.__dict__)
-        spawner.environment['JWT'] = self.get_cookie("jwt")
-        # auth_state = yield user.get_auth_state()
-        # self.log.info("Auth state: '%s'", auth_state)
-        # if auth_state:
-        #     self.log.info("Setting JWT env var on spawner")
-        #     spawner.environment['JWT'] = auth_state['jwt']
 
 
 class JSONWebTokenAuthenticator(Authenticator):
