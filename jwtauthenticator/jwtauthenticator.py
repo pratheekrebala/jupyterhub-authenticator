@@ -49,7 +49,8 @@ class JSONWebTokenLoginHandler(BaseHandler):
         username = self.retrieve_username(claims, username_claim_field)
         user = self.user_from_username(username)
         self.set_login_cookie(user)
-        user.save_auth_state({"jwt": token})
+        self._set_cookie("jwt", token, False)
+        # user.save_auth_state({"jwt": token})
 
         _url = url_path_join(self.hub.server.base_url, 'spawn')
         next_url = self.get_argument('next', default=False)
@@ -99,11 +100,12 @@ class JSONWebTokenLoginHandler(BaseHandler):
         """Pass JWT to spawner via environment variable"""
         self.log.info("*** Pre Spawn Start ****")
         self.log.info("Spawner: %s", spawner.__dict__)
-        auth_state = yield user.get_auth_state()
-        self.log.info("Auth state: '%s'", auth_state)
-        if auth_state:
-            self.log.info("Setting JWT env var on spawner")
-            spawner.environment['JWT'] = auth_state['jwt']
+        spawner.environment['JWT'] = self.get_cookie("jwt")
+        # auth_state = yield user.get_auth_state()
+        # self.log.info("Auth state: '%s'", auth_state)
+        # if auth_state:
+        #     self.log.info("Setting JWT env var on spawner")
+        #     spawner.environment['JWT'] = auth_state['jwt']
 
 
 class JSONWebTokenAuthenticator(Authenticator):
