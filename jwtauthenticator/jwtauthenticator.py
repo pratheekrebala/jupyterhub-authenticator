@@ -50,7 +50,7 @@ class JSONWebTokenLoginHandler(BaseHandler):
         user = self.user_from_username(username)
         self.set_login_cookie(user)
 
-        _url = url_path_join(self.hub.server.base_url, 'user', username)
+        _url = url_path_join(self.hub.server.base_url, 'spawn')
         next_url = self.get_argument('next', default=False)
         if next_url:
              _url = next_url
