@@ -15,11 +15,11 @@ url = 'https://pypi.q-ctrl.com/simple'
 [tool.poetry.dependencies]  # https://poetry.eustace.io/docs/versions
 python = ">=3.6.4, <3.8"
 jupyterhub = "^1.0.0"
-python-jose = "^3.0.1"
-
+pyjwt = "^1.7.1"
 
 [tool.poetry.dev-dependencies]
 pylama = "^7.7.1"
+
 [tool.dephell.main]
 from = {format = "poetry", path = "pyproject.toml"}
 to = {format = "setuppy", path = "setup.py"}

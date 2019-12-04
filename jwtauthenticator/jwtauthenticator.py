@@ -4,7 +4,7 @@ from jupyterhub.auth import LocalAuthenticator
 from jupyterhub.utils import url_path_join
 from tornado import gen, web
 from traitlets import Unicode, Bool
-from jose import jwt, exceptions
+import jwt
 
 class JSONWebTokenLoginHandler(BaseHandler):
 
@@ -57,18 +57,19 @@ class JSONWebTokenLoginHandler(BaseHandler):
 
         self.redirect(_url)
 
+
+
     def verify_jwt_with_claims(token, signing_certificate, audience):
         # If no audience is supplied then assume we're not verifying the audience field.
         if audience == "":
-            opts = {"verify_aud": False}
-        else:
-            opts = {}
+            audience = None
+
         with open(signing_certificate, 'r') as rsa_public_key_file:
             try:
-                return jwt.decode(token, rsa_public_key_file.read(), audience=audience, options=opts)
-            except exceptions.ExpiredSignatureError:
+                return jwt.decode(json_web_token, rsa_public_key_file.read(), algorithms=['RS256'], audience=audience)
+            except jwt.ExpiredSignatureError:
                 self.log.error("Token has expired")
-            except exceptions.JWTError as ex:
+            except jwt.PyJWTError as ex:
                 self.log.error("Token error - %s", ex)
             except Exception as ex:
                 self.log.error("Could not decode token claims - %s", ex)
@@ -77,19 +78,17 @@ class JSONWebTokenLoginHandler(BaseHandler):
     def verify_jwt_using_secret(json_web_token, secret, audience):
         # If no audience is supplied then assume we're not verifying the audience field.
         if audience == "":
-            opts = {"verify_aud": False}
-        else:
-            opts = {}
-        
+            audience = None
+            
         try:
-            return jwt.decode(json_web_token, secret, algorithms=list(jwt.ALGORITHMS.SUPPORTED), audience=audience, options=opts)
-        except exceptions.ExpiredSignatureError:
+            return jwt.decode(json_web_token, secret, algorithms=['HS256','RS256'], audience=audience)
+        except jwt.ExpiredSignatureError:
             self.log.error("Token has expired")
-        except exceptions.JWTError as ex:
+        except jwt.PyJWTError as ex:
             self.log.error("Token error - %s", ex)
         except Exception as ex:
             self.log.error("Could not decode token claims - %s", ex)
-        raise web.HTTPError(403)   
+        raise web.HTTPError(403)  
 
     def retrieve_username(claims, username_claim_field):
         # retrieve the username from the claims
