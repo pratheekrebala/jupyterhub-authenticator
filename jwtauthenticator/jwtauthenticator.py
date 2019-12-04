@@ -97,8 +97,12 @@ class JSONWebTokenLoginHandler(BaseHandler):
     @gen.coroutine
     def pre_spawn_start(self, user, spawner):
         """Pass JWT to spawner via environment variable"""
+        self.log.info("*** Pre Spawn Start ****")
+        self.log.info("Spawner: %s", spawner.__dict__)
         auth_state = yield user.get_auth_state()
+        self.log.info("Auth state: '%s'", auth_state)
         if auth_state:
+            self.log.info("Setting JWT env var on spawner")
             spawner.environment['JWT'] = auth_state['jwt']
 
 
