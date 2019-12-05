@@ -1,42 +1,43 @@
-# JupyterHub tokenauthenticator - A JWT Token Authenticator for JupyterHub
+# Q-CTRL JWT Token Authenticator for JupyterHub
 
-Authenticate to Jupyterhub using a query parameter for the JSONWebToken, or by an authenticating proxy that can set the Authorization header with the content of a JSONWebToken.
+Authenticate to Jupyterhub using a query parameter for the JSONWebToken, or by an authenticating proxy that can set the Authorization header with the content of a JSON Web Token.
+
+Originally forked from [mogthesprog/jwtauthenticator](https://github.com/mogthesprog/jwtauthenticator) with the following modifications thus far:
+
+- Changed next URL on login to spawn notebook instance rather than going to home.
+- Added ability to use an int value for user_id claim.
+- Replaced python-jose with pyjwt which is used internally.
+- Moved onto Poetry instead of setup.py
+- Added Dockerfile for zero-to-jupyterhub Hub.
+- Added CI/CD pipelines
+
+Deployed to our JupyterHub instance using [Zero to JupyterHub](https://zero-to-jupyterhub.readthedocs.io). Our ingress has currently been modified to strip Content-Security-Protection headers to allow inclusion in any iframe. This will need to be modified for production.
+
+Deployment configuration for the environment this is currently being served from [is here](https://github.com/qctrl/jupyterhub-deploy/tree/master/front-end-research).
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [Credits](#credits)
+- [License](#license)
 
 ## Installation
 
 This package can be installed with pip:
 
 ```
-pip install jupyterhub-jwtauthenticator
-```
-
-Alternately, you can clone this repository and run:
-
-```
-cd jwtauthenticator
-pip install -e .
+pip install qctrl-jupyterhub-authenticator
 ```
 
 ## Configuration
 
-You should edit your :file:`jupyterhub_config.py` to set the authenticator class, the JSONWebTokenLocalAuthenticator provides features such as local user creation. If you already have local users then you may use the JSONWebTokenAuthenticator authenticator class:
-
-##### For authentication and local user creation
-```
-c.JupyterHub.authenticator_class = 'jwtauthenticator.jwtauthenticator.JSONWebTokenLocalAuthenticator'
-```
-
-This class is derived from LocalAuthenticator and therefore provides features such as the ability to add local accounts through the admin interface if configured to do so.
-
-##### For authentication of the token only
-
-```
-c.JupyterHub.authenticator_class = 'jwtauthenticator.jwtauthenticator.JSONWebTokenAuthenticator'
-```
+Configuration of this authenticator is done in the [JupyterHub Helm Chart values](https://github.com/qctrl/jupyterhub-deploy/blob/master/front-end-research/config.yaml).
 
 ##### Required configuration
 
-You'll also need to set some configuration options including the location of the signing certificate (in PEM format), field containing the userPrincipalName or sAMAccountName/username, and the expected audience of the JSONWebToken. This last part is optional, if you set audience to an empty string then the authenticator will skip the validation of that field.
+You'll need to set some configuration options including the location of the signing certificate (in PEM format), field containing the userPrincipalName or sAMAccountName/username, and the expected audience of the JSONWebToken. This last part is optional, if you set audience to an empty string then the authenticator will skip the validation of that field.
 
 ```
 # one of "secret" or "signing_certificate" must be given.  If both, then "secret" will be the signing method used.
@@ -52,10 +53,14 @@ c.JSONWebTokenAuthenticator.expected_audience = 'https://myApp.domain.local/'   
 
 You should be able to start jupyterhub. :)
 
-## Issues
+## Contributing
 
-If you have any issues or bug reports, all are welcome in the issues section. I'll do my best to respond quickly.
+See [Contributing](https://github.com/qctrl/.github/blob/master/CONTRIBUTING.md).
 
-## Contribution
+## Credits
 
-If you want to fix the bugs yourself then raise a PR and I'll take a look :)
+See [Contributors](https://github.com/qctrl/api2/graphs/contributors).
+
+## License
+
+See [LICENSE](LICENSE).
