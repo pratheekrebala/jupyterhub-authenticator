@@ -70,7 +70,7 @@ class JSONWebTokenLoginHandler(BaseHandler):
             audience = None
             
         try:
-            return jwt.decode(token, secret, algorithms=['HS256','RS256'], audience=audience)
+            return jwt.decode(token, secret, algorithms='RS256', audience=audience)
         except jwt.ExpiredSignatureError:
             self.log.error("Token has expired")
         except jwt.PyJWTError as ex:
