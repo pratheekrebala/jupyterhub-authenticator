@@ -62,13 +62,13 @@ class JSONWebTokenLoginHandler(BaseHandler):
     def verify_jwt_using_certificate(self, token, signing_certificate, audience):
         with open(signing_certificate, 'r') as rsa_public_key_file:
             secret = rsa_public_key_file.read()
-            return self.verify_jwt_using_secret(token, secret, audience)            
+            return self.verify_jwt_using_secret(token, secret, audience)
 
     def verify_jwt_using_secret(self, token, secret, audience):
         # If no audience is supplied then assume we're not verifying the audience field.
         if audience == "":
             audience = None
-            
+
         try:
             return jwt.decode(token, secret, algorithms='RS256', audience=audience)
         except jwt.ExpiredSignatureError:
@@ -77,7 +77,7 @@ class JSONWebTokenLoginHandler(BaseHandler):
             self.log.error("Token error - %s", ex)
         except Exception as ex:
             self.log.error("Could not decode token claims - %s", ex)
-        raise web.HTTPError(403)  
+        raise web.HTTPError(403)
 
     def retrieve_username(self, claims, username_claim_field):
         # retrieve the username from the claims
@@ -128,7 +128,7 @@ class JSONWebTokenAuthenticator(Authenticator):
         default_value='Authorization',
         config=True,
         help="""HTTP header to inspect for the authenticated JSON Web Token.""")
-        
+
     header_is_authorization = Bool(
         default_value=True,
         config=True,
@@ -150,7 +150,13 @@ class JSONWebTokenAuthenticator(Authenticator):
 
     @gen.coroutine
     def authenticate(self, *args):
+        self.log.info("Authenticate method was called")
         raise NotImplementedError()
+
+    @gen.coroutine
+    def pre_spawn_start(self, user, spawner):
+        """Pass upstream_token to spawner via environment variable"""
+        spawner.environment['UPSTREAM_TOKEN'] = 'Luigi is awesome'
 
 
 class JSONWebTokenLocalAuthenticator(JSONWebTokenAuthenticator, LocalAuthenticator):
