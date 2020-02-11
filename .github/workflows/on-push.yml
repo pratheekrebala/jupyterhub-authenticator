@@ -18,7 +18,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         source <(curl -sL http://ci.q-ctrl.com)
-        ./ci vault login -r ${{ secrets.VAULT_ROLE_ID }} -s ${{ secrets.VAULT_SECRET_ID }}        
+        ./ci vault login -r ${{ secrets.VAULT_ROLE_ID }} -s ${{ secrets.VAULT_SECRET_ID }}
         ./ci docker run qctrl/python-build:3.7 /scripts/housekeeping.sh
 
   publish_internally:
@@ -44,4 +44,4 @@ jobs:
         ./ci vault login -r ${{ secrets.VAULT_ROLE_ID }} -s ${{ secrets.VAULT_SECRET_ID }}
         ./ci vault get -t $(cat .token) -p secret/data/dockerhub -k hub_user -o .hub_user
         ./ci vault get -t $(cat .token) -p secret/data/dockerhub -k hub_pass -o .hub_pass
-        ./ci docker buildPush -u $(cat .hub_user) -p $(cat .hub_pass) -t qctrl/jupyterhub-k8s-hub:0.8.2 .        
+        ./ci docker buildPush -u $(cat .hub_user) -p $(cat .hub_pass) -t qctrl/jupyterhub-k8s-hub:0.9.0-beta.3 .
