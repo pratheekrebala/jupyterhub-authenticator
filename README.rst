@@ -37,6 +37,17 @@ This package can be installed with pip:
 
    pip install qctrl-jupyterhub-authenticator
 
+Cluster Installation
+--------------------
+
+You'll need:
+
+
+* A Kubernetes cluster (Docker for mac will do for local testing)
+* Helm v3.0+
+* Kubectl
+* gettext
+
 Configuration
 -------------
 
