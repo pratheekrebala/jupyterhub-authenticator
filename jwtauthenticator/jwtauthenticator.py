@@ -98,7 +98,7 @@ class JSONWebTokenLoginHandler(BaseHandler):
 
 class JSONWebTokenAuthenticator(Authenticator):
     """
-    Accept the authenticated JSON Web Token from header.
+    Accept the authenticated JSON Web Token from header or query parameter.
     """
     signing_certificate = Unicode(
         config=True,
@@ -148,14 +148,23 @@ class JSONWebTokenAuthenticator(Authenticator):
             (r'/login', JSONWebTokenLoginHandler),
         ]
 
-    @gen.coroutine
-    def authenticate(self, *args):
-        self.log.info("Authenticate method was called")
-        raise NotImplementedError()
+    async def authenticate(self, handler, data):
+        self.log.info("*** authenticate method was called ***")
+        self.log.info("Data - %s" % data)
+        token = self.get_argument("jwt", default=False)
+        self.log.info("Token was %s" % token)
+        u = {
+                'name': '11',
+                'auth_state': {
+                    'foo': 'bar',
+                }
+            }
+        return u
 
-    @gen.coroutine
-    def pre_spawn_start(self, user, spawner):
+    async def pre_spawn_start(self, user, spawner):
         """Pass upstream_token to spawner via environment variable"""
+        self.log.info(" *** pre_spawn_start method was called ***")
+        self.log.info("User info: %s" % user)
         spawner.environment['UPSTREAM_TOKEN'] = 'Luigi is awesome'
 
 
