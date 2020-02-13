@@ -9,7 +9,7 @@ import jwt
 
 class JSONWebTokenLoginHandler(BaseHandler):
 
-    def get(self):
+    async def get(self):
         header_name = self.authenticator.header_name
         param_name = self.authenticator.param_name
         header_is_authorization = self.authenticator.header_is_authorization
@@ -45,12 +45,22 @@ class JSONWebTokenLoginHandler(BaseHandler):
             claims = self.verify_jwt_using_certificate(token, signing_certificate, audience)
         else:
            raise web.HTTPError(401)
-        self.log.info("Claims: %s", claims)
 
+        # JWT was valid
+        self.log.info("Claims: %s", claims)
         username = self.retrieve_username(claims, username_claim_field)
+
         user = self.user_from_username(username)
         self.set_login_cookie(user)
-        # self._set_cookie("jupyterhub-jwt", token, False)
+
+        # Persist to database
+        auth_info = {
+            "name": username,
+            "auth_state": {
+                "jwt": token
+            }
+        }
+        await self.auth_to_user(auth_info)
 
         _url = url_path_join(self.hub.server.base_url, 'spawn')
         next_url = self.get_argument('next', default=False)
@@ -141,32 +151,26 @@ class JSONWebTokenAuthenticator(Authenticator):
 
     secret = Unicode(
         config=True,
-        help="""Shared secret key for siging JWT token.  If defined, it overrides any setting for signing_certificate""")
+        help="""Shared secret key for signing JWT token.  If defined, it overrides any setting for signing_certificate""")
 
     def get_handlers(self, app):
         return [
             (r'/login', JSONWebTokenLoginHandler),
         ]
 
-    async def authenticate(self, handler, data):
-        self.log.info("*** authenticate method was called ***")
-        self.log.info("Data - %s" % data)
-        token = self.get_argument("jwt", default=False)
-        self.log.info("Token was %s" % token)
-        u = {
-                'name': '11',
-                'auth_state': {
-                    'foo': 'bar',
-                }
-            }
-        return u
+    def authenticate(self, handler, data):
+        raise NotImplementedError()
 
     async def pre_spawn_start(self, user, spawner):
         """Pass upstream_token to spawner via environment variable"""
-        self.log.info(" *** pre_spawn_start method was called ***")
-        self.log.info("User info: %s" % user)
-        spawner.environment['UPSTREAM_TOKEN'] = 'Luigi is awesome'
+        self.log.info("Setting auth_state environment variables")
 
+        auth_state = await user.get_auth_state()
+        if not auth_state:
+            self.log.warn("Auth state was empty!")
+            return
+
+        spawner.environment['QCTRL_TOKEN'] = auth_state['jwt']
 
 class JSONWebTokenLocalAuthenticator(JSONWebTokenAuthenticator, LocalAuthenticator):
     """
