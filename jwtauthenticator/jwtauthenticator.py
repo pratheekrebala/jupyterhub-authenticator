@@ -10,39 +10,36 @@ import jwt
 class JSONWebTokenLoginHandler(BaseHandler):
 
     async def get(self):
-        header_name = self.authenticator.header_name
-        param_name = self.authenticator.param_name
-        header_is_authorization = self.authenticator.header_is_authorization
 
-        auth_header_content = self.request.headers.get(header_name, "")
-        auth_cookie_content = self.get_cookie("XSRF-TOKEN", "")
+        # Read config
+        access_param_name = self.authenticator.access_param_name
+        refresh_param_name = self.authenticator.refresh_param_name
         signing_certificate = self.authenticator.signing_certificate
         secret = self.authenticator.secret
         username_claim_field = self.authenticator.username_claim_field
         audience = self.authenticator.expected_audience
-        tokenParam = self.get_argument(param_name, default=False)
 
-        if auth_header_content and tokenParam:
-            raise web.HTTPError(400)
-        elif auth_header_content:
-            if header_is_authorization:
-                # we should not see "token" as first word in the AUTHORIZATION header, if we do it could mean someone coming in with a stale API token
-                if auth_header_content.split()[0] != "Bearer":
-                    raise web.HTTPError(403)
-            else:
-                token = auth_header_content
-        elif auth_cookie_content:
-            token = auth_cookie_content
-        elif tokenParam:
-            token = tokenParam
+        # Read values
+        auth_cookie_content = self.get_cookie("XSRF-TOKEN", "")
+        access_param = self.get_argument(self.authenticator.access_param_name, default=False)
+        refresh_param = self.get_argument(self.authenticator.refresh_param_name, default=False)
+
+        # Determine whether to use cookie content or query parameters
+        if auth_cookie_content:
+            access_token = auth_cookie_content
+            refresh_token = "" # TODO: get both tokens from this
+        elif access_param and refresh_param:
+            access_token = access_param
+            refresh_token = refresh_param
         else:
             raise web.HTTPError(401)
 
+        # Parse access token
         claims = ""
         if secret:
-            claims = self.verify_jwt_using_secret(token, secret, audience)
+            claims = self.verify_jwt_using_secret(access_token, secret, audience)
         elif signing_certificate:
-            claims = self.verify_jwt_using_certificate(token, signing_certificate, audience)
+            claims = self.verify_jwt_using_certificate(access_token, signing_certificate, audience)
         else:
            raise web.HTTPError(401)
 
@@ -57,7 +54,8 @@ class JSONWebTokenLoginHandler(BaseHandler):
         auth_info = {
             "name": username,
             "auth_state": {
-                "jwt": token
+                "access_token": access_token,
+                "refresh_token": refresh_token,
             }
         }
         await self.auth_to_user(auth_info)
@@ -134,20 +132,15 @@ class JSONWebTokenAuthenticator(Authenticator):
         help="""HTTP header to inspect for the authenticated JSON Web Token."""
     )
 
-    header_name = Unicode(
-        default_value='Authorization',
+    access_param_name = Unicode(
         config=True,
-        help="""HTTP header to inspect for the authenticated JSON Web Token.""")
+        default_value='',
+        help="""The name of the query parameter used to specify the JWT access token""")
 
-    header_is_authorization = Bool(
-        default_value=True,
+    refresh_param_name = Unicode(
         config=True,
-        help="""Treat the inspected header as an Authorization header.""")
-
-    param_name = Unicode(
-        config=True,
-        default_value='access_token',
-        help="""The name of the query parameter used to specify the JWT token""")
+        default_value='',
+        help="""The name of the query parameter used to specify the JWT refresh token""")
 
     secret = Unicode(
         config=True,
@@ -168,9 +161,14 @@ class JSONWebTokenAuthenticator(Authenticator):
         auth_state = await user.get_auth_state()
         if not auth_state:
             self.log.warn("Auth state was empty!")
+
+            # Set empty strings to avoid KeyError exceptions
+            spawner.environment['QCTRL_ACCESS_TOKEN'] = ''
+            spawner.environment['QCTRL_REFRESH_TOKEN'] = ''
             return
 
-        spawner.environment['QCTRL_TOKEN'] = auth_state['jwt']
+        spawner.environment['QCTRL_ACCESS_TOKEN'] = auth_state['access_token']
+        spawner.environment['QCTRL_REFRESH_TOKEN'] = auth_state['refresh_token']
 
 class JSONWebTokenLocalAuthenticator(JSONWebTokenAuthenticator, LocalAuthenticator):
     """
