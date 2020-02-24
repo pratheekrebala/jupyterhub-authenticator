@@ -12,36 +12,26 @@ class JSONWebTokenLoginHandler(BaseHandler):
     async def get(self):
 
         # Read config
-        access_param_name = self.authenticator.access_param_name
-        refresh_param_name = self.authenticator.refresh_param_name
         signing_certificate = self.authenticator.signing_certificate
         secret = self.authenticator.secret
         username_claim_field = self.authenticator.username_claim_field
         audience = self.authenticator.expected_audience
 
         # Read values
-        auth_cookie_content = self.get_cookie("XSRF-TOKEN", "")
-        access_param = self.get_argument(self.authenticator.access_param_name, default=False)
-        refresh_param = self.get_argument(self.authenticator.refresh_param_name, default=False)
+        auth_cookie_content = self.get_cookie("_qctrl_jwt", "")
 
         # Determine whether to use cookie content or query parameters
         if auth_cookie_content:
-            access_token = auth_cookie_content
-            refresh_token = "" # TODO: get both tokens from this
-        elif access_param and refresh_param:
-            access_token = access_param
-            refresh_token = refresh_param
+            decoded = self.verify_jwt(auth_cookie_content, secret, signing_certificate, audience)
+            access_token = decoded["access"]
+            refresh_token = decoded["refresh"]
+            self.log.info("Successfuly decoded access and refresh tokens")
         else:
+            self.log.info("The _qctrl_jwt cookie was not found, or was empty")
             raise web.HTTPError(401)
 
         # Parse access token
-        claims = ""
-        if secret:
-            claims = self.verify_jwt_using_secret(access_token, secret, audience)
-        elif signing_certificate:
-            claims = self.verify_jwt_using_certificate(access_token, signing_certificate, audience)
-        else:
-           raise web.HTTPError(401)
+        claims = self.verify_jwt(access_token, secret, signing_certificate, audience)
 
         # JWT was valid
         self.log.info("Claims: %s", claims)
@@ -66,6 +56,17 @@ class JSONWebTokenLoginHandler(BaseHandler):
              _url = next_url
 
         self.redirect(_url)
+
+    def verify_jwt(self, token, secret, signing_certificate, audience):
+        claims = ""
+        if secret:
+            claims = self.verify_jwt_using_secret(token, secret, audience)
+        elif signing_certificate:
+            claims = self.verify_jwt_using_certificate(token, signing_certificate, audience)
+        else:
+            raise web.HTTPError(401)
+
+        return claims
 
     def verify_jwt_using_certificate(self, token, signing_certificate, audience):
         with open(signing_certificate, 'r') as rsa_public_key_file:
@@ -131,16 +132,6 @@ class JSONWebTokenAuthenticator(Authenticator):
         config=True,
         help="""HTTP header to inspect for the authenticated JSON Web Token."""
     )
-
-    access_param_name = Unicode(
-        config=True,
-        default_value='',
-        help="""The name of the query parameter used to specify the JWT access token""")
-
-    refresh_param_name = Unicode(
-        config=True,
-        default_value='',
-        help="""The name of the query parameter used to specify the JWT refresh token""")
 
     secret = Unicode(
         config=True,

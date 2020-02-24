@@ -5,7 +5,6 @@ RUN python3 -m pip install --upgrade pip==19.3.1 setuptools==42.0.2
 
 USER jovyan
 
-# RUN python3 -m pip install --user qctrl-jupyterhub-authenticator
 COPY . .
 RUN python3 -m pip install --user .
 
