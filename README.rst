@@ -1,8 +1,8 @@
 
-Q-CTRL JWT Token Authenticator for JupyterHub
-=============================================
+Q-CTRL JupyterHub Authenticator
+===============================
 
-Authenticate to Jupyterhub using a query parameter for the JSONWebToken, or by an authenticating proxy that can set the Authorization header with the content of a JSON Web Token.
+Authenticate to JupyterHub using a query parameter for the JSONWebToken, or by an authenticating proxy that can set the Authorization header with the content of a JSON Web Token.
 
 Originally forked from `mogthesprog/jwtauthenticator <https://github.com/mogthesprog/jwtauthenticator>`_ with the following modifications thus far:
 
@@ -18,7 +18,7 @@ Deployed to our JupyterHub instance using `Zero to JupyterHub <https://zero-to-j
 
 Deployment configuration for the environment this is currently being served from `is here <https://github.com/qctrl/jupyterhub-deploy/tree/master/front-end-research>`_.
 
-Table of Contents
+Table of contents
 -----------------
 
 
@@ -26,7 +26,6 @@ Table of Contents
 * `Usage <#usage>`_
 * `Contributing <#contributing>`_
 * `Credits <#credits>`_
-* `License <#license>`_
 
 Installation
 ------------
@@ -37,8 +36,8 @@ This package can be installed with pip:
 
    pip install qctrl-jupyterhub-authenticator
 
-Cluster Installation
---------------------
+Cluster installation
+^^^^^^^^^^^^^^^^^^^^
 
 You'll need:
 
@@ -49,12 +48,9 @@ You'll need:
 * gettext
 
 Configuration
--------------
+^^^^^^^^^^^^^
 
 Configuration of this authenticator is done in the `JupyterHub Helm Chart values <https://github.com/qctrl/jupyterhub-deploy/blob/master/front-end-research/config.yaml>`_.
-
-Required configuration
-""""""""""""""""""""""
 
 You'll need to set some configuration options including the location of the signing certificate (in PEM format), field containing the userPrincipalName or sAMAccountName/username, and the expected audience of the JSONWebToken. This last part is optional, if you set audience to an empty string then the authenticator will skip the validation of that field.
 
@@ -70,7 +66,7 @@ You'll need to set some configuration options including the location of the sign
    #c.JSONWebLocalTokenAuthenticator.create_system_users = True                       # This will enable local user creation upon authentication, requires JSONWebTokenLocalAuthenticator
    #c.JSONWebTokenAuthenticator.header_name = 'Authorization'                         # default value
 
-You should be able to start jupyterhub. :)
+You should be able to start JupyterHub. :)
 
 Contributing
 ------------
@@ -80,9 +76,4 @@ See `Contributing <https://github.com/qctrl/.github/blob/master/CONTRIBUTING.md>
 Credits
 -------
 
-See `Contributors <https://github.com/qctrl/api2/graphs/contributors>`_.
-
-License
--------
-
-See `LICENSE <LICENSE>`_.
+See `Contributors <https://github.com/qctrl/jupyterhub-authenticator/graphs/contributors>`_.
