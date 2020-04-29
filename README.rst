@@ -82,4 +82,4 @@ See `Contributors <https://github.com/qctrl/jupyterhub-authenticator/graphs/cont
 License
 -------
 
-See `LICENSE <LICENSE>`_
+See `LICENSE <LICENSE>`_.
