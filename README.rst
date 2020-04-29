@@ -26,6 +26,7 @@ Table of contents
 * `Usage <#usage>`_
 * `Contributing <#contributing>`_
 * `Credits <#credits>`_
+* `License <#license>`_
 
 Installation
 ------------
@@ -77,3 +78,8 @@ Credits
 -------
 
 See `Contributors <https://github.com/qctrl/jupyterhub-authenticator/graphs/contributors>`_.
+
+License
+-------
+
+See `LICENSE <LICENSE>`_

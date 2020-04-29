@@ -21,6 +21,7 @@ Deployment configuration for the environment this is currently being served from
 - [Usage](#usage)
 - [Contributing](#contributing)
 - [Credits](#credits)
+- [License](#license)
 
 ## Installation
 
@@ -66,3 +67,7 @@ See [Contributing](https://github.com/qctrl/.github/blob/master/CONTRIBUTING.md)
 ## Credits
 
 See [Contributors](https://github.com/qctrl/jupyterhub-authenticator/graphs/contributors).
+
+## License
+
+See [LICENSE](LICENSE).
