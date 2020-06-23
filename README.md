@@ -27,9 +27,11 @@ Deployment configuration for the environment this is currently being served from
 
 This package can be installed with pip:
 
-```
+```bash
 pip install qctrl-jupyterhub-authenticator
 ```
+
+For the Q-CTRL instances however, it is baked into a [Docker image](https://hub.docker.com/r/qctrl/jupyterhub-k8s-hub/tags), which is then deployed [via a helm chart](https://github.com/qctrl/jupyterhub-deploy/blob/master/app-prod/apply-changes.sh#L22) in place of the standard [jupyterhub/k8s-hub](https://hub.docker.com/r/jupyterhub/k8s-hub) image.
 
 ### Cluster installation
 
@@ -46,7 +48,7 @@ Configuration of this authenticator is done in the [JupyterHub Helm Chart values
 
 You'll need to set some configuration options including the location of the signing certificate (in PEM format), field containing the userPrincipalName or sAMAccountName/username, and the expected audience of the JSONWebToken. This last part is optional, if you set audience to an empty string then the authenticator will skip the validation of that field.
 
-```
+```bash
 # one of "secret" or "signing_certificate" must be given.  If both, then "secret" will be the signing method used.
 c.JSONWebTokenAuthenticator.secret = '<insert-256-bit-secret-key-here>'            # The secrect key used to generate the given token
 # -OR-
@@ -58,7 +60,7 @@ c.JSONWebTokenAuthenticator.expected_audience = 'https://myApp.domain.local/'   
 #c.JSONWebTokenAuthenticator.header_name = 'Authorization'                         # default value
 ```
 
-You should be able to start JupyterHub. :)
+Within Q-CTRL, configuration values are provided in the [Helm values file](https://github.com/qctrl/jupyterhub-deploy/blob/master/app-prod/config.yaml).
 
 ## Contributing
 
