@@ -37,7 +37,7 @@ This package can be installed with pip:
 
    pip install qctrl-jupyterhub-authenticator
 
-For the Q-CTRL instances however, it is baked into a `Docker image <https://hub.docker.com/repository/docker/qctrl/jupyterhub-authenticator>`_\ , which is then deployed `via a helm chart <https://github.com/qctrl/jupyterhub-deploy/blob/master/app-prod/apply-changes.sh#L22>`_ in place of the standard `jupyterhub/k8s-hub <https://hub.docker.com/r/jupyterhub/k8s-hub>`_ image.
+For the Q-CTRL instances however, it is baked into a `Docker image <https://hub.docker.com/r/qctrl/jupyterhub-k8s-hub/tags>`_\ , which is then deployed `via a helm chart <https://github.com/qctrl/jupyterhub-deploy/blob/master/app-prod/apply-changes.sh#L22>`_ in place of the standard `jupyterhub/k8s-hub <https://hub.docker.com/r/jupyterhub/k8s-hub>`_ image.
 
 Cluster installation
 ^^^^^^^^^^^^^^^^^^^^
