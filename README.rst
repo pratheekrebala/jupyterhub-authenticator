@@ -80,8 +80,3 @@ Credits
 -------
 
 See `Contributors <https://github.com/qctrl/jupyterhub-authenticator/graphs/contributors>`_.
-
-License
--------
-
-See `LICENSE <LICENSE>`_.
