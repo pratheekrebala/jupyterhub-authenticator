@@ -69,7 +69,3 @@ See [Contributing](https://github.com/qctrl/.github/blob/master/CONTRIBUTING.md)
 ## Credits
 
 See [Contributors](https://github.com/qctrl/jupyterhub-authenticator/graphs/contributors).
-
-## License
-
-See [LICENSE](LICENSE).
