@@ -100,18 +100,18 @@ class JSONWebTokenLoginHandler(BaseHandler):
     def retrieve_username(self, claims, username_claim_field):
         # retrieve the username from the claims
         username = claims[username_claim_field]
+        return username
+        # # Our system returns the username as an integer - convert to string
+        # if not isinstance(username, str):
+        #     username = "%s" % username
 
-        # Our system returns the username as an integer - convert to string
-        if not isinstance(username, str):
-            username = "%s" % username
+        # if "@" in username:
+        #     # process username as if email, pull out string before '@' symbol
+        #     return username.split("@")[0]
 
-        if "@" in username:
-            # process username as if email, pull out string before '@' symbol
-            return username.split("@")[0]
-
-        else:
-            # assume not username and return the user
-            return username
+        # else:
+        #     # assume not username and return the user
+        #     return username
 
 
 class JSONWebTokenAuthenticator(Authenticator):
