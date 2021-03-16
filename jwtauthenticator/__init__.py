@@ -4,4 +4,4 @@ from .jwtauthenticator import (
     JSONWebTokenLoginHandler
 )
 
-__all__ = ['JSONWebTokenAuthenticator', 'JSONWebTokenLocalAuthenticator', 'JSONWebTokenLoginHandler']
+__all__ = [JSONWebTokenAuthenticator, JSONWebTokenLocalAuthenticator, JSONWebTokenLoginHandler]

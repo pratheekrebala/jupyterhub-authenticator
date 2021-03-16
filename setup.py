@@ -36,7 +36,7 @@ setup(
     extras_require={"dev": ["pylama==7.*,>=7.7.1"]},
     entry_points={
         'jupyterhub.authenticators': [
-            'jwt = jwtauthenticator:JSONWebTokenAuthenticator'
+            'jwt = jwtauthenticator.jwtauthenticator:JSONWebTokenAuthenticator'
         ]
     }
 )
