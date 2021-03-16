@@ -34,4 +34,9 @@ setup(
     package_data={},
     install_requires=['jupyterhub==1.*,>=1.0.0', 'pyjwt==2.*,>=2.0.1'],
     extras_require={"dev": ["pylama==7.*,>=7.7.1"]},
+    entry_points={
+        'jupyterhub.authenticators': [
+            'jwt = jwtauthenticator:JSONWebTokenAuthenticator'
+        ]
+    }
 )
