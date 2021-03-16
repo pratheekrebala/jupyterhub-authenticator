@@ -1,3 +1,4 @@
+from jwt.exceptions import PyJWKClientError
 from jupyterhub.handlers import BaseHandler
 from jupyterhub.auth import Authenticator
 from jupyterhub.auth import LocalAuthenticator
@@ -5,33 +6,35 @@ from jupyterhub.utils import url_path_join
 from tornado import gen, web
 from traitlets import Unicode, Bool
 import jwt
-
+from jwt import PyJWKClient
 
 class JSONWebTokenLoginHandler(BaseHandler):
 
     async def get(self):
 
         # Read config
+        jwks_url = self.authenticator.jwks_url
         signing_certificate = self.authenticator.signing_certificate
         secret = self.authenticator.secret
         username_claim_field = self.authenticator.username_claim_field
         audience = self.authenticator.expected_audience
+        cookie_name = self.authenticator.cookie_name
 
         # Read values
-        auth_cookie_content = self.get_cookie("_qctrl_jwt", "")
+        auth_cookie_content = self.get_cookie(cookie_name, "")
 
         # Determine whether to use cookie content or query parameters
         if auth_cookie_content:
-            decoded = self.verify_jwt(auth_cookie_content, secret, signing_certificate, audience)
+            decoded = self.verify_jwt(auth_cookie_content, secret, signing_certificate, jwks_url, audience)
             access_token = decoded["access"]
             refresh_token = decoded["refresh"]
             self.log.info("Successfuly decoded access and refresh tokens")
         else:
-            self.log.info("The _qctrl_jwt cookie was not found, or was empty")
+            self.log.info("The %s cookie was not found, or was empty", cookie_name)
             raise web.HTTPError(401)
 
         # Parse access token
-        claims = self.verify_jwt(access_token, secret, signing_certificate, audience)
+        claims = self.verify_jwt(access_token, secret, signing_certificate, jwks_url, audience)
 
         # JWT was valid
         self.log.info("Claims: %s", claims)
@@ -57,16 +60,25 @@ class JSONWebTokenLoginHandler(BaseHandler):
 
         self.redirect(_url)
 
-    def verify_jwt(self, token, secret, signing_certificate, audience):
+    def verify_jwt(self, token, secret, signing_certificate, jwks_url, audience):
         claims = ""
         if secret:
             claims = self.verify_jwt_using_secret(token, secret, audience)
         elif signing_certificate:
             claims = self.verify_jwt_using_certificate(token, signing_certificate, audience)
+        elif jwks_url:
+            claims = self.verify_jwt_using_jwks(token, jwks_url, audience)
         else:
             raise web.HTTPError(401)
 
         return claims
+
+    def verify_jwt_using_jwks(self, token, jwks_url, audience):
+        jwks_client = PyJWKClient(jwks_url)
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
+        secret = signing_key.key
+
+        return self.verify_jwt_using_secret(token, secret, audience)
 
     def verify_jwt_using_certificate(self, token, signing_certificate, audience):
         with open(signing_certificate, 'r') as rsa_public_key_file:
@@ -136,6 +148,17 @@ class JSONWebTokenAuthenticator(Authenticator):
     secret = Unicode(
         config=True,
         help="""Shared secret key for signing JWT token.  If defined, it overrides any setting for signing_certificate""")
+    
+    jwks_url = Unicode(
+        config=True,
+        help="""JKWS endpoint to request RSA signing keys from."""
+    )
+
+    cookie_name = Unicode(
+        default_value='_qctrl_jwt',
+        config=True,
+        help="""Name of the cookie containing the JWT token."""
+    )
 
     def get_handlers(self, app):
         return [
