@@ -23,18 +23,18 @@ class JSONWebTokenLoginHandler(BaseHandler):
         # Read values
         auth_cookie_content = self.get_cookie(cookie_name, "")
 
-        # Determine whether to use cookie content or query parameters
-        if auth_cookie_content:
-            decoded = self.verify_jwt(auth_cookie_content, secret, signing_certificate, jwks_url, audience)
-            access_token = decoded["access"]
-            refresh_token = decoded["refresh"]
-            self.log.info("Successfuly decoded access and refresh tokens")
-        else:
-            self.log.info("The %s cookie was not found, or was empty", cookie_name)
-            raise web.HTTPError(401)
+        # # Determine whether to use cookie content or query parameters
+        # if auth_cookie_content:
+        #     decoded = self.verify_jwt(auth_cookie_content, secret, signing_certificate, jwks_url, audience)
+        #     access_token = decoded["access"]
+        #     refresh_token = decoded["refresh"]
+        #     self.log.info("Successfuly decoded access and refresh tokens")
+        # else:
+        #     self.log.info("The %s cookie was not found, or was empty", cookie_name)
+        #     raise web.HTTPError(401)
 
         # Parse access token
-        claims = self.verify_jwt(access_token, secret, signing_certificate, jwks_url, audience)
+        claims = self.verify_jwt(auth_cookie_content, secret, signing_certificate, jwks_url, audience)
 
         # JWT was valid
         self.log.info("Claims: %s", claims)
@@ -46,10 +46,7 @@ class JSONWebTokenLoginHandler(BaseHandler):
         # Persist to database
         auth_info = {
             "name": username,
-            "auth_state": {
-                "access_token": access_token,
-                "refresh_token": refresh_token,
-            }
+            "auth_state": {}
         }
         await self.auth_to_user(auth_info)
 
@@ -177,12 +174,12 @@ class JSONWebTokenAuthenticator(Authenticator):
             self.log.warn("Auth state was empty!")
 
             # Set empty strings to avoid KeyError exceptions
-            spawner.environment['QCTRL_ACCESS_TOKEN'] = ''
-            spawner.environment['QCTRL_REFRESH_TOKEN'] = ''
+            #spawner.environment['QCTRL_ACCESS_TOKEN'] = ''
+            #spawner.environment['QCTRL_REFRESH_TOKEN'] = ''
             return
 
-        spawner.environment['QCTRL_ACCESS_TOKEN'] = auth_state['access_token']
-        spawner.environment['QCTRL_REFRESH_TOKEN'] = auth_state['refresh_token']
+        #spawner.environment['QCTRL_ACCESS_TOKEN'] = auth_state['access_token']
+        #spawner.environment['QCTRL_REFRESH_TOKEN'] = auth_state['refresh_token']
 
 class JSONWebTokenLocalAuthenticator(JSONWebTokenAuthenticator, LocalAuthenticator):
     """
